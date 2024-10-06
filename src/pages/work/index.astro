@@ -6,8 +6,23 @@ import { dateRange } from "@lib/utils";
 import { WORK } from "@consts";
 
 const collection = (await getCollection("work"))
-  .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf());
+  .sort((a, b) => {
+    if (a.data.dateEnd === "Present" && b.data.dateEnd === "Present") {
+      return new Date(b.data.dateStart) - new Date(a.data.dateStart);
+    }
 
+    if (a.data.dateEnd === "Present") {
+      return -1;
+    }
+
+    if (b.data.dateEnd === "Present") {
+      return 1;
+    }
+
+    const dateA = new Date(a.data.dateEnd);
+    const dateB = new Date(b.data.dateEnd);
+    return dateB - dateA;
+  });
 const work = await Promise.all(
   collection.map(async (item) => {
     const { Content } = await item.render();
